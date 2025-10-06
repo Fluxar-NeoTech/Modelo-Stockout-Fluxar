@@ -1,69 +1,45 @@
-\# 🤖 \*\*Pull Request\*\* - Treinamento de Modelo de IA.
+# 🤖 **Pull Request** - Treinamento de Modelo de IA
 
-\## 📄 \*\*Objetivo\*\*
+## 📄 **Objetivo**
 
-\- Escreva de forma clara e resumida o que este PR deve alterar.
-
-
+Escreva de forma clara e resumida o que este PR deve alterar.
 
 ---
 
+## 🔍 **Escopo do Trabalho**
 
+### **Coleta e Pré-processamento dos Dados**
+- [ ] Limpeza de dados faltantes;  
+- [ ] Normalização e padronização de variáveis;  
+- [ ] Feature engineering relevante para previsão.
 
-\## 🔍 \*\*Escopo do Trabalho\*\*
+### **Treinamento do Modelo**
+- [ ] Escolha do algoritmo adequado;  
+- [ ] Ajuste de hiperparâmetros;  
+- [ ] Validação cruzada e avaliação de desempenho.
 
-\- \[ ] \*\*Coleta e pré-processamento dos dados:\*\*  
-
-&nbsp; - \[ ] Limpeza de dados faltantes;
-
-&nbsp; - \[ ] Normalização e padronização de variáveis;  
-
-&nbsp; - \[ ] Feature engineering relevante para previsão.
-
-
-
-\- \[ ] \*\*Treinamento do modelo:\*\*  
-
-&nbsp; - \[ ] Escolha do algoritmo adequado;  
-
-&nbsp; - \[ ] Ajuste de hiperparâmetros;  
-
-&nbsp; - \[ ] Validação cruzada e avaliação de desempenho.
-
-
-
-\- \[ ] \*\*Pós-treinamento\*\*  
-
-&nbsp; - \[ ] Geração de métricas (Acurácia, Precisão, Recall, F1-score, etc.);  
-
-&nbsp; - \[ ] Matriz de confusão e análise de erros;  
-
-&nbsp; - \[ ] Relatório com recomendações.
-
-
+### **Pós-treinamento**
+- [ ] Geração de métricas (Acurácia, Precisão, Recall, F1-score, etc.);  
+- [ ] Matriz de confusão e análise de erros;  
+- [ ] Relatório com recomendações.
 
 ---
 
+## ✅ **Checklist de Qualidade**
 
-
-\## ✅ \*\*Checklist de Qualidade\*\*
-
-\- \[ ] \*\*Código revisado:\*\* seguir boas práticas e padrões definidos pelo time;
-
-\- \[ ] \*\*Tratamento de exceções:\*\* tratar qualquer possível erro;
-
-\- \[ ] \*\*Segurança:\*\* Nenhum dado sensível exposto;
-
-\- \[ ] \*\*Organização:\*\* Documentação atualizada com instruções de uso;
-
-\- \[ ] \*\*Testes realizados:\*\* para validação do código, foram feitos testes.
-
-
+- [ ] **Código revisado:** segue boas práticas e padrões definidos pelo time;  
+- [ ] **Tratamento de exceções:** tratar possíveis erros;  
+- [ ] **Segurança:** nenhum dado sensível exposto;  
+- [ ] **Organização:** documentação atualizada com instruções de uso;  
+- [ ] **Testes realizados:** foram feitos testes para validação do código.
 
 ---
 
+## 💡 **Links**
 
+Adicione aqui os links utilizados para a execução deste projeto, como:
 
-\## 💡 \*\*Links\*\*
-
-\- Adicione os links utilizados para a execução desse projeto.
+- Conjunto de dados utilizado;  
+- Referências teóricas ou papers;  
+- Notebooks de treino e validação;  
+- Ferramentas ou APIs externas.
