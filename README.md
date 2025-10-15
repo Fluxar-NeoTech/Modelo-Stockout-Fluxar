@@ -1,4 +1,4 @@
-# Resumo da Demanda: Previsão de Stockout – Projeto Fluxar
+# Modelo de Previsão de Stockout – Projeto Fluxar
 
 ## Objetivo
 Desenvolver um modelo de aprendizado de máquina capaz de prever o número de dias até o estoque acabar (`days_to_stockout`) para cada produto em cada loja. Essa previsão permitirá:
@@ -62,11 +62,6 @@ Desenvolver um modelo de aprendizado de máquina capaz de prever o número de di
 **Conclusão:**  
 RandomForest apresentou o melhor desempenho para previsões precisas de estoque.
 
-## Próximos passos esperados
-
-- Escolha do modelo principal: RandomForest (ou XGBoost como alternativa)
-- Otimização de hiperparâmetros: `n_estimators`, `max_depth`, `min_samples_leaf`, `learning_rate` (XGBoost)
-- Construção de pipeline completo: tratamento de nulos, outliers, encoding e escalonamento para dados novos
 - Validação detalhada: gráficos de predição vs realidade, análise por produto/loja/categoria
 - Integração em produção: exportar modelos e pipeline (`joblib`/`pickle`), conectar com painel Fluxar para alertas
 - Documentação final: MD/PDF com visual Fluxar, tabelas de métricas, gráficos e feature importance
