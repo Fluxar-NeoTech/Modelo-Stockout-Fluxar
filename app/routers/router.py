@@ -1,18 +1,12 @@
-from fastapi import FastAPI, HTTPException, status
+from app.models.predict_request import PredictRequest
+from fastapi import FastAPI, HTTPException, status, APIRouter
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
 import numpy as np
-from utils import get_fluxar_data, load_model_from_redis, preprocess_data
+from app.utils import get_fluxar_data, load_model_from_redis, preprocess_data
 
-# Inicializa FastAPI
-app = FastAPI(title="Fluxar IA API", version="1.1")
+router = APIRouter(prefix="/predict")
 
-# Modelo de entrada (JSON)
-class PredictRequest(BaseModel):
-    industria_id: int
-    setor_id: int
-
-@app.post("/predict")
+@router.post("")
 def predict(request: PredictRequest):
     """
     Endpoint que recebe indústria e setor,
