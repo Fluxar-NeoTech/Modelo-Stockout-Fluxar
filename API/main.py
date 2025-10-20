@@ -1,4 +1,5 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, status
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import numpy as np
 from utils import get_fluxar_data, load_model_from_redis, preprocess_data
@@ -48,7 +49,10 @@ def predict(request: PredictRequest):
 
         # 6️) Retorna os últimos 10 registros com previsões
         result = df[["data", "produto_id", "unidade_id", "days_to_stockout_pred"]].tail(10).to_dict(orient="records")
-        return {"status": "ok", "predictions": result}
+        return JSONResponse(
+            content={"predictions": result},
+            status_code=status.HTTP_200_OK
+        )
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao gerar previsões: {str(e)}")
