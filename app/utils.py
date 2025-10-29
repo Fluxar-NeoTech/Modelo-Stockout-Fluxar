@@ -3,7 +3,7 @@
 # -----------------------------------------------------------------------
 # Importando bibliotecas
 import os
-import psycopg2
+import psycopg
 import pandas as pd
 import redis
 import joblib
@@ -22,7 +22,7 @@ REDIS_URL = os.getenv("REDIS_URL")
 def get_conn():
     """Cria e retorna uma conexão com o banco Postgres."""
     try:
-        conn = psycopg2.connect(DATABASE_URL)
+        conn = psycopg.connect(DATABASE_URL)
         return conn
     except Exception as e:
         raise ConnectionError(f"Erro ao conectar ao Postgres: {str(e)}")
