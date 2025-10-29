@@ -9,7 +9,6 @@ import redis
 import joblib
 import io
 from dotenv import load_dotenv
-import numpy as np
 
 # Carrega variáveis do .env
 load_dotenv()
