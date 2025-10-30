@@ -40,9 +40,9 @@ def get_redis():
 # -----------------------------
 # Funções de dados
 # -----------------------------
-def get_fluxar_data(industria_id: int, setor_id: int) -> pd.DataFrame:
+def get_fluxar_data(industria_id: int, setor_id: int, unidade_id: int) -> pd.DataFrame:
     """
-    Consulta o histórico de estoque filtrando por indústria e setor.
+    Consulta o histórico de estoque filtrando por indústria, setor e unidade.
     Retorna um DataFrame pronto para pré-processamento.
     """
     query = f"""
@@ -57,6 +57,7 @@ def get_fluxar_data(industria_id: int, setor_id: int) -> pd.DataFrame:
         FROM historico_estoque
         WHERE industria_id = {industria_id}
           AND setor_id = {setor_id}
+          AND unidade_id = {unidade_id}
         ORDER BY data;
     """
     try:
