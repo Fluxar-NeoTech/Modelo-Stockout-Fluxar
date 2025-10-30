@@ -3,13 +3,12 @@
 # -----------------------------------------------------------------------
 # Importando bibliotecas
 import os
-import psycopg2
+import psycopg
 import pandas as pd
 import redis
 import joblib
 import io
 from dotenv import load_dotenv
-import numpy as np
 
 # Carrega variáveis do .env
 load_dotenv()
@@ -23,7 +22,7 @@ REDIS_URL = os.getenv("REDIS_URL")
 def get_conn():
     """Cria e retorna uma conexão com o banco Postgres."""
     try:
-        conn = psycopg2.connect(DATABASE_URL)
+        conn = psycopg.connect(DATABASE_URL)
         return conn
     except Exception as e:
         raise ConnectionError(f"Erro ao conectar ao Postgres: {str(e)}")
@@ -71,13 +70,28 @@ def get_fluxar_data(industria_id: int, setor_id: int, unidade_id: int) -> pd.Dat
         raise RuntimeError(f"Erro ao buscar dados no Postgres: {str(e)}")
 
 def load_model_from_redis():
-    """Carrega o modelo serializado do Redis."""
+    """
+    Carrega o modelo serializado do Redis, recombinando chunks se necessário.
+    Suporta modelos maiores que o limite de 10MB do Redis remoto.
+    """
     try:
         r = get_redis()
+        # Tenta carregar pelo esquema antigo (chave única)
         model_bytes = r.get("modelo_fluxar_serializado")
-        if not model_bytes:
-            raise FileNotFoundError("Modelo não encontrado no Redis.")
-        return joblib.load(io.BytesIO(model_bytes))
+        if model_bytes:
+            return joblib.load(io.BytesIO(model_bytes))
+
+        # Se não existir chave única, tenta o esquema dividido em partes
+        num_parts_bytes = r.get("ml_model_fluxar_parts")
+        if not num_parts_bytes:
+            raise FileNotFoundError("Modelo não encontrado no Redis (nenhuma chave válida).")
+        num_parts = int(num_parts_bytes.decode() if isinstance(num_parts_bytes, bytes) else num_parts_bytes)
+        parts = [r.get(f"ml_model_fluxar_part_{i}") for i in range(num_parts)]
+        if any(p is None for p in parts):
+            raise RuntimeError("Alguma parte do modelo não foi encontrada no Redis.")
+        model_rejoined = b"".join(parts)
+        return joblib.load(io.BytesIO(model_rejoined))
+
     except Exception as e:
         raise RuntimeError(f"Erro ao carregar modelo do Redis: {str(e)}")
 
@@ -93,3 +107,17 @@ def preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
         return df
     except Exception as e:
         raise RuntimeError(f"Erro no pré-processamento dos dados: {str(e)}")
+
+def align_features(df: pd.DataFrame, model_features: list) -> pd.DataFrame:
+    """
+    Garante que o dataframe tenha as mesmas features que o modelo espera.
+    Adiciona colunas faltantes com 0 e remove colunas extras.
+    """
+    for col in model_features:
+        if col not in df.columns:
+            df[col] = 0
+    # Remove colunas extras que o modelo não viu
+    extra_cols = [c for c in df.columns if c not in model_features]
+    if extra_cols:
+        df = df.drop(columns=extra_cols)
+    return df[model_features]
