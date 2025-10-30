@@ -1,5 +1,5 @@
 from app.models.predict_request import PredictRequest 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Body
 from fastapi.responses import JSONResponse
 import numpy as np
 from app.utils import get_fluxar_data, load_model_from_redis, preprocess_data, align_features
@@ -7,7 +7,7 @@ from app.utils import get_fluxar_data, load_model_from_redis, preprocess_data, a
 router = APIRouter(prefix="/predict")
 
 @router.post("")
-def predict(request: PredictRequest):
+def predict(request: PredictRequest = Body(...)):
     """
     Endpoint que recebe indústria, unidade e setor,
     retorna previsões de days_to_stockout para os produtos.
