@@ -9,14 +9,14 @@ router = APIRouter(prefix="/predict")
 @router.post("")
 def predict(request: PredictRequest):
     """
-    Endpoint que recebe indústria e setor,
+    Endpoint que recebe indústria, unidade e setor,
     retorna previsões de days_to_stockout para os produtos.
     """
     try:
         # 1️) Consulta os dados filtrando indústria e setor
-        df = get_fluxar_data(request.industria_id, request.setor_id)
+        df = get_fluxar_data(request.industria_id, request.setor_id, request.unidade_id)
         if df.empty:
-            raise HTTPException(status_code=404, detail="Nenhum dado encontrado para essa indústria/setor.")
+            raise HTTPException(status_code=404, detail="Nenhum dado encontrado para essa indústria/setor/unidade.")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao consultar dados: {str(e)}")
 
@@ -42,7 +42,7 @@ def predict(request: PredictRequest):
         df["days_to_stockout_pred"] = np.expm1(preds)
 
         # 6️) Retorna os últimos 10 registros com previsões
-        result = df[["data", "produto_id", "unidade_id", "days_to_stockout_pred"]].tail(10).to_dict(orient="records")
+        result = df[["data", "produto_id", "unidade_id", "industria_id", "days_to_stockout_pred"]].tail(10).to_dict(orient="records")
         return JSONResponse(
             content={"predictions": result},
             status_code=status.HTTP_200_OK
