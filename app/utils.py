@@ -57,6 +57,7 @@ def get_fluxar_data(industria_id: int, setor_id: int, unidade_id: int) -> pd.Dat
         WHERE industria_id = {industria_id}
           AND setor_id = {setor_id}
           AND unidade_id = {unidade_id}
+          and data = (select max(data) from historico_estoque)
         ORDER BY data;
     """
     try:
