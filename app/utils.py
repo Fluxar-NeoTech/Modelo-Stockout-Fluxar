@@ -97,24 +97,56 @@ def load_model_from_redis():
     except Exception as e:
         raise RuntimeError(f"Erro ao carregar modelo do Redis: {str(e)}")
 
+import pandas as pd
+import numpy as np
+
 def preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
-    """Pré-processa os dados para o modelo: média móvel + one-hot."""
-    try:
-        df = df.sort_values(["produto_id", "data"])
-        df["volume_movimentado"] = df["volume_movimentado"].astype(float)
+    """
+    Pré-processa os dados de estoque para previsão de days_to_stockout,
+    criando as features compatíveis com o modelo RandomForest salvo no Redis.
+    """
+    df = df.sort_values(["produto_id", "data"])
+    df["volume_movimentado"] = df["volume_movimentado"].astype(float)
 
-        # Média móvel de 7 dias (por produto)
-        df["Units_Sold_Rolling7"] = (
-            df.groupby("produto_id")["volume_movimentado"]
-              .transform(lambda x: x.rolling(window=7, min_periods=1).mean())
-        )
+    # Histórico e movimento
+    df["inventory_level"] = (
+        df.groupby("produto_id")["volume_movimentado"].cumsum()
+    )
+    df["units_sold"] = df["volume_movimentado"]
+    df["units_ordered"] = (
+        df.groupby("produto_id")["volume_movimentado"].shift(1).fillna(0)
+    )
 
-        # One-hot encoding da coluna 'movimentacao'
-        df = pd.get_dummies(df, columns=["movimentacao"], drop_first=True)
+    # Datas
+    df["dayofweek"] = df["data"].dt.dayofweek / 6  # normalizado (0 a 1)
+    df["month"] = (df["data"].dt.month - 1) / 11   # normalizado (0 a 1)
+    df["is_weekend"] = df["dayofweek"].isin([5/6, 1.0]).astype(int)
 
-        return df
-    except Exception as e:
-        raise RuntimeError(f"Erro no pré-processamento dos dados: {str(e)}")
+    # Simulação de categoria e região (placeholder, se não existirem)
+    if "categoria" not in df.columns:
+        df["categoria"] = np.random.choice(["Groceries", "Electronics", "Furniture", "Toys"], size=len(df))
+    if "regiao" not in df.columns:
+        df["regiao"] = np.random.choice(["North", "South", "West"], size=len(df))
+    if "store_id" not in df.columns:
+        df["store_id"] = np.random.choice(["S002", "S003", "S004", "S005"], size=len(df))
+
+    # One-hot encoding
+    df = pd.get_dummies(
+        df,
+        columns=["categoria", "regiao", "store_id", "produto_id"],
+        prefix=["category", "region", "store_id", "product_id"],
+        drop_first=False
+    )
+
+    # Reordena colunas principais no início (boa prática)
+    base_cols = [
+        "inventory_level", "units_sold", "units_ordered",
+        "dayofweek", "month", "is_weekend"
+    ]
+    others = [c for c in df.columns if c not in base_cols]
+    df = df[base_cols + others]
+
+    return df
 
 
 def align_features(df: pd.DataFrame, model_features: list) -> pd.DataFrame:

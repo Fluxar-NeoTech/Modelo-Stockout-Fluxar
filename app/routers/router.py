@@ -37,6 +37,11 @@ def predict(request: PredictRequest = Body(...)):
         features = [col for col in df.columns if col not in ["data", "days_to_stockout"]]
         X = align_features(df[features].fillna(0), model.feature_names_in_)
 
+        # Teste 
+        print("Features usadas pelo modelo:", model.feature_names_in_)
+        print("Primeiras linhas do X:\n", X.head())
+
+
         # Faz a predição e desfaz o log1p
         preds = model.predict(X)
         df["days_to_stockout_pred"] = np.expm1(preds)
