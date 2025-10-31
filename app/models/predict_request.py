@@ -4,3 +4,4 @@ from pydantic import BaseModel
 class PredictRequest(BaseModel):
     industria_id: int
     setor_id: int
+    unidade_id: int
