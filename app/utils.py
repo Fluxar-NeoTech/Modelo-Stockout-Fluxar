@@ -45,18 +45,20 @@ def get_fluxar_data(industria_id: int, setor_id: int, unidade_id: int) -> pd.Dat
     Retorna um DataFrame pronto para pré-processamento.
     """
     query = f"""
-        SELECT 
+        SELECT
             data,
             movimentacao,
             volume_movimentado,
+            p.nome as nome_produto,
             produto_id,
             unidade_id,
-            setor_id,
+            he.setor_id,
             industria_id
-        FROM historico_estoque
+        FROM historico_estoque he
+        join produto p on p.id = he.produto_id
         WHERE industria_id = {industria_id}
-          AND setor_id = {setor_id}
-          AND unidade_id = {unidade_id}
+        AND he.setor_id = {setor_id}
+        AND unidade_id = {unidade_id}
         ORDER BY data;
     """
     try:
@@ -98,15 +100,22 @@ def load_model_from_redis():
 def preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
     """Pré-processa os dados para o modelo: média móvel + one-hot."""
     try:
-        df = df.sort_values("data")
+        df = df.sort_values(["produto_id", "data"])
         df["volume_movimentado"] = df["volume_movimentado"].astype(float)
-        # Média móvel de 7 dias
-        df["Units_Sold_Rolling7"] = df["volume_movimentado"].rolling(window=7, min_periods=1).mean()
+
+        # Média móvel de 7 dias (por produto)
+        df["Units_Sold_Rolling7"] = (
+            df.groupby("produto_id")["volume_movimentado"]
+              .transform(lambda x: x.rolling(window=7, min_periods=1).mean())
+        )
+
         # One-hot encoding da coluna 'movimentacao'
         df = pd.get_dummies(df, columns=["movimentacao"], drop_first=True)
+
         return df
     except Exception as e:
         raise RuntimeError(f"Erro no pré-processamento dos dados: {str(e)}")
+
 
 def align_features(df: pd.DataFrame, model_features: list) -> pd.DataFrame:
     """

@@ -42,10 +42,10 @@ def predict(request: PredictRequest = Body(...)):
         df["days_to_stockout_pred"] = np.expm1(preds)
 
         # 6️) Retorna os últimos 10 registros com previsões
-        result = df[["data", "produto_id", "unidade_id", "industria_id", "days_to_stockout_pred"]].tail(10).to_dict(orient="records")
+        result = df[["data", "nome_produto", "produto_id", "unidade_id", "industria_id", "days_to_stockout_pred"]].tail(10).to_dict(orient="records")
         # Pega apenas a última previsão por produto
         df_last = df.sort_values("data").groupby("produto_id").tail(1)[
-            ["data", "produto_id", "unidade_id", "days_to_stockout_pred"]
+            ["data", "nome_produto", "produto_id", "unidade_id", "days_to_stockout_pred"]
         ].copy()
 
         # Converte Timestamp para string
