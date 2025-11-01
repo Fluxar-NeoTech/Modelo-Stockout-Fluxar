@@ -41,35 +41,42 @@ engine = create_engine(DB_URL)
 # ------------------------------------------
 def get_fluxar_data(industria_id: int, setor_id: int, unidade_id: int):
     """
-    Retorna dataframe com histórico de estoque filtrado por industria, setor e unidade.
-    Mantém valores individuais de inventory_level e volume_movimentado.
-    Faz join com historico_capacidade para pegar capacidade_total_ocupada.
+    Retorna dataframe com histórico de estoque filtrado por indústria, setor e unidade.
+    Inclui:
+      - Dados de vendas e pedidos
+      - Capacidade total ocupada
+      - Nome e categoria do produto
     """
     query = f"""
         SELECT 
             h.data,
             h.produto_id,
             h.unidade_id,
+            p.nome AS produto_nome,
+            p.tipo AS category,
             CASE WHEN h.movimentacao = 'S' THEN h.volume_movimentado ELSE 0 END AS units_sold,
             CASE WHEN h.movimentacao = 'E' THEN h.volume_movimentado ELSE 0 END AS units_ordered,
-            hc.capacidade_total_ocupada AS inventory_level,
-            p.tipo AS category
+            hc.capacidade_total_ocupada AS inventory_level
         FROM historico_estoque h
-        JOIN produto p ON h.produto_id = p.id
+        JOIN produto p 
+            ON h.produto_id = p.id
         LEFT JOIN historico_capacidade hc
-               ON hc.produto_id = h.produto_id
-              AND hc.unidade_id = h.unidade_id
-              AND hc.industria_id = h.industria_id
-              AND hc.data_completa = h.data
+            ON hc.produto_id = h.produto_id
+           AND hc.unidade_id = h.unidade_id
+           AND hc.industria_id = h.industria_id
+           AND hc.data_completa = h.data
         WHERE h.industria_id = {industria_id}
           AND h.setor_id = {setor_id}
           AND h.unidade_id = {unidade_id}
         ORDER BY h.produto_id, h.unidade_id, h.data
     """
     df = pd.read_sql(query, engine)
+
+    # Conversão e ordenação
     df['data'] = pd.to_datetime(df['data'], errors='coerce')
     df = df.dropna(subset=['data'])
-    df = df.sort_values(['produto_id', 'unidade_id', 'data'])
+    df = df.sort_values(['produto_id', 'unidade_id', 'data']).reset_index(drop=True)
+
     return df
 
 

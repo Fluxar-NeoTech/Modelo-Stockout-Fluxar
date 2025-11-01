@@ -59,7 +59,7 @@ def predict(request: PredictRequest):
         df_recent['days_to_stockout_pred'] = df_recent['days_to_stockout_pred'].astype(float)
         df_recent['data'] = df_recent['data'].dt.strftime('%Y-%m-%d')
 
-        output = df_recent[['data', 'produto_id', 'unidade_id', 'days_to_stockout_pred']].to_dict(orient='records')
+        output = df_recent[['data', 'produto_nome', 'produto_id', 'unidade_id', 'days_to_stockout_pred']].to_dict(orient='records')
 
         return JSONResponse(content={"predictions": output}, status_code=status.HTTP_200_OK)
 
